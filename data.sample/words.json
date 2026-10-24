@@ -1,0 +1,41 @@
+{
+	"version": 1,
+	"words": {
+		"sentence": {
+			"word": "sentence",
+			"ipa": "/ˈsentəns/",
+			"pos": "n.",
+			"meanings": [],
+			"clicks": 1,
+			"firstSeenAt": 1792836148812,
+			"lastSeenAt": 1792836148812
+		},
+		"habit": {
+			"word": "habit",
+			"ipa": "/ˈhæbɪt/",
+			"pos": "n.",
+			"meanings": [],
+			"clicks": 1,
+			"firstSeenAt": 1792836148812,
+			"lastSeenAt": 1792836148812
+		},
+		"remarkable": {
+			"word": "remarkable",
+			"ipa": "/rɪˈmɑkəbl/",
+			"pos": "adj.",
+			"meanings": [],
+			"clicks": 1,
+			"firstSeenAt": 1792836148812,
+			"lastSeenAt": 1792836148812
+		},
+		"weather": {
+			"word": "weather",
+			"ipa": "/ˈweðə(r)/",
+			"pos": "n.",
+			"meanings": [],
+			"clicks": 1,
+			"firstSeenAt": 1792836148812,
+			"lastSeenAt": 1792836148812
+		}
+	}
+}

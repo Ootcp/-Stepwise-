@@ -1,0 +1,11 @@
+{
+	"version": "1.0.28",
+	"name": "ecdict-sqlite-28.zip",
+	"url": "https://github.com/skywind3000/ECDICT/releases/download/1.0.28/ecdict-sqlite-28.zip",
+	"sha256": "ea01f76a3b3351021ce47077e89234465cc9441c8793054495320d06c0c3f3f6",
+	"size": 216765132,
+	"entry": "stardict.db",
+	"database": "english-words.db",
+	"downloadMb": 207,
+	"diskMb": 1250
+}

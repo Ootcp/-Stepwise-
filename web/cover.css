@@ -1,0 +1,1248 @@
+/* ============================================================================
+   拾级 · 封面(首页 + 文章库)
+
+   封面和应用是同一个世界,不是两套:暖纸、墨色、一道金。
+   变的只是尺度 —— 封面用两套自带的显示字体(马善政楷书 + Instrument Serif),
+   应用内部仍然用系统字。
+
+   这一份样式独立成文件,原因有三个:
+   一、它自带一套调色(更沉的墨、更中性的纸),作用域限定在 data-view 为 home 或 library
+      的时候;阅读页的调色一个像素都不动。
+   二、它要带自己的字体文件。阅读页不加载显示字体,首页加载,于是这两件事绑在一起。
+   三、它带自己的暗色。封面在暗色下比应用更深,像一张更暗的封面纸。
+
+   名字一律 home__ 前缀,和应用里的 .panel、.icon-button 等分开 ——
+   名字撞车会让两个视图互相污染样式,这类问题在单文件样式表里最难查。
+   ========================================================================== */
+
+/* ---------- 字体 ----------
+   马善政楷体:中文显示字。子集只保留本页用到的 289 个字形,114 KB。
+   Instrument Serif:西文显示字,正常体与意大利体。
+   两款都是 SIL OFL,许可在 web/fonts/ 里。 */
+
+@font-face {
+	font-family: "Shiji Brush";
+	src: url("./fonts/mashanzheng-subset.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Shiji Serif";
+	src: url("./fonts/instrument-serif-latin-400-normal.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191,
+		U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: "Shiji Serif";
+	src: url("./fonts/instrument-serif-latin-400-italic.woff2") format("woff2");
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191,
+		U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ---------- 调色 ----------
+   封面自己的调色。作用域挂在 html 上,于是 body 和两个封面视图都拿得到,
+   而 data-view="reader" 时这些声明不生效,应用原样。
+
+   墨色比应用深,纸比应用少一点黄。两者同属暖纸暖墨,只是封面更沉 ——
+   标题字要压得住大面积的纸,应用的正文不需要那么重。 */
+
+html[data-view="home"],
+html[data-view="library"],
+html[data-view="words"],
+html[data-view="spell"] {
+	--paper: #f2efe8;
+	--paper-deep: #e6e2d8;
+	--card: #fffefb;
+	--ink: #1c1a15;
+	--ink-soft: #5d574a;
+	--ink-faint: #6b6352;
+	--gold: #8a6410;
+	--gold-bright: #a3760f;
+	--accent: var(--gold);
+	--accent-soft: rgba(176, 128, 16, 0.16);
+	--accent-contrast: #fffdf5;
+	--danger: #b4482f;
+	/* 拼写练习的对/错。绿是新加的,红仍走 --danger 那一族,不引入第二种红。 */
+	--right: #2f7a4d;
+	--wrong: #a3402c;
+	--hairline: rgba(28, 26, 21, 0.14);
+	--hairline-soft: rgba(28, 26, 21, 0.07);
+	--shadow: 0 1px 2px rgba(28, 26, 21, 0.05), 0 12px 32px rgba(28, 26, 21, 0.07);
+	--shadow-lift: 0 1px 2px rgba(28, 26, 21, 0.06), 0 18px 48px rgba(28, 26, 21, 0.11);
+	/* 收尾那一段是深墨色的带子。它不随主题翻转 —— 暗色下它比纸更深。 */
+	--band: #17150f;
+	--band-fg: #f2ede1;
+	--band-line: rgba(242, 237, 225, 0.14);
+	--radius: 4px;
+	--font-brush: "Shiji Brush", "STKaiti", "KaiTi", "Songti SC", serif;
+	--font-serif: "Shiji Serif", "Songti SC", Georgia, serif;
+	--gutter: clamp(20px, 5vw, 64px);
+	--measure: 62ch;
+	--ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+html[data-theme="dark"][data-view="home"],
+html[data-theme="dark"][data-view="library"],
+html[data-theme="dark"][data-view="words"],
+html[data-theme="dark"][data-view="spell"] {
+	--paper: #14140f;
+	--paper-deep: #1b1b15;
+	--card: #21201a;
+	--ink: #ece7db;
+	--ink-soft: #b0a898;
+	--ink-faint: #9a9280;
+	--gold: #d9a92e;
+	--gold-bright: #eec04a;
+	--accent: var(--gold);
+	--accent-soft: rgba(217, 169, 46, 0.18);
+	--accent-contrast: #14140f;
+	--danger: #e8a08e;
+	/* 暗色下绿要提亮才压得住纸,红仍然贴着 --danger。 */
+	--right: #7ac48f;
+	--wrong: #e89f8b;
+	--hairline: rgba(236, 231, 219, 0.16);
+	--hairline-soft: rgba(236, 231, 219, 0.08);
+	--shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.45);
+	--shadow-lift: 0 1px 2px rgba(0, 0, 0, 0.45), 0 18px 48px rgba(0, 0, 0, 0.55);
+	--band: #0a0a07;
+	--band-fg: #e9e3d5;
+	--band-line: rgba(233, 227, 213, 0.14);
+}
+
+/* 封面两页都是整页滚动,底色由纸决定。 */
+html[data-view="home"] body {
+	background: var(--paper);
+}
+
+html[data-view="library"] body,
+html[data-view="words"] body,
+html[data-view="spell"] body {
+	background: var(--paper);
+}
+
+/* ============================================================================
+   顶栏
+   ========================================================================== */
+
+.home__bar {
+	position: sticky;
+	top: 0;
+	z-index: 40;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 18px var(--gutter);
+	background: color-mix(in srgb, var(--paper) 86%, transparent);
+	backdrop-filter: blur(12px) saturate(1.2);
+	border-bottom: 1px solid var(--hairline-soft);
+}
+
+.home__brand {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 12px;
+	color: inherit;
+	text-decoration: none;
+}
+
+.home__word {
+	font-family: var(--font-brush);
+	font-size: 26px;
+	line-height: 1;
+	letter-spacing: 0.06em;
+}
+
+.home__brand-rule {
+	width: 18px;
+	height: 1px;
+	background: var(--gold);
+	transform: translateY(-6px);
+}
+
+.home__latin {
+	font-family: var(--font-serif);
+	font-size: 12px;
+	letter-spacing: 0.34em;
+	color: var(--ink-faint);
+	text-transform: uppercase;
+}
+
+.home__nav {
+	display: flex;
+	align-items: center;
+	gap: 22px;
+}
+
+.home__nav-link {
+	padding: 0 0 2px;
+	border: 0;
+	border-bottom: 1px solid transparent;
+	background: none;
+	color: var(--ink-soft);
+	font: inherit;
+	font-size: 14px;
+	letter-spacing: 0.08em;
+	cursor: pointer;
+	transition: color 200ms var(--ease), border-color 200ms var(--ease);
+}
+
+.home__nav-link:hover {
+	color: var(--ink);
+	border-bottom-color: var(--gold);
+}
+
+/* 封面上的圆形图标按钮:描边而不是实心 —— 和应用里那个实心的不是同一个东西。 */
+html[data-view="home"] .icon-button,
+html[data-view="library"] .icon-button,
+html[data-view="words"] .icon-button,
+html[data-view="spell"] .icon-button {
+	width: 38px;
+	height: 38px;
+	font-size: inherit;
+	color: var(--ink-soft);
+	background: transparent;
+	border: 1px solid var(--hairline);
+	box-shadow: none;
+	transition: color 200ms var(--ease), border-color 200ms var(--ease), background 200ms var(--ease);
+}
+
+html[data-view="home"] .icon-button:hover,
+html[data-view="library"] .icon-button:hover,
+html[data-view="words"] .icon-button:hover,
+html[data-view="spell"] .icon-button:hover {
+	color: var(--gold);
+	border-color: var(--gold);
+	background: color-mix(in srgb, var(--gold) 8%, transparent);
+}
+
+/* ============================================================================
+   首屏
+   ========================================================================== */
+
+.home__hero {
+	position: relative;
+	display: grid;
+	grid-template-rows: 1fr auto;
+	min-height: calc(100dvh - 76px);
+	padding: clamp(48px, 9vh, 110px) var(--gutter) clamp(28px, 5vh, 56px);
+	overflow: hidden;
+	isolation: isolate;
+}
+
+/* 纸纹:极低对比的噪点,只在近处才看得见 */
+.home__grain {
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	opacity: 0.55;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3Crect width='180' height='180' filter='url(%23n)' opacity='0.16'/%3E%3C/svg%3E");
+	mix-blend-mode: multiply;
+}
+
+html[data-theme="dark"] .home__grain {
+	mix-blend-mode: screen;
+	opacity: 0.22;
+}
+
+.home__stack {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	gap: clamp(20px, 3.4vh, 34px);
+}
+
+/* 标题:两个毛笔字。金箔在字面上扫过,扫过的地方是金色,其余是墨色。 */
+.home__title {
+	margin: 0;
+	font-weight: 400;
+	line-height: 0.86;
+}
+
+.home__glyphs {
+	position: relative;
+	display: inline-block;
+	font-family: var(--font-brush);
+	font-size: clamp(104px, 20vw, 268px);
+	letter-spacing: 0.05em;
+	text-indent: 0.05em;
+}
+
+.home__ink,
+.home__foil {
+	display: block;
+	color: var(--ink);
+}
+
+.home__foil {
+	position: absolute;
+	inset: 0;
+	color: var(--gold-bright);
+	/* 一条软边从字面上扫过。底下的墨色不变,金色只是被这条光扫过。 */
+	-webkit-mask-image: linear-gradient(100deg, transparent 38%, #000 50%, transparent 62%);
+	mask-image: linear-gradient(100deg, transparent 38%, #000 50%, transparent 62%);
+	-webkit-mask-size: 300% 100%;
+	mask-size: 300% 100%;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	animation: home-foil 7.5s var(--ease) infinite;
+}
+
+@keyframes home-foil {
+	0% {
+		-webkit-mask-position: 180% 0;
+		mask-position: 180% 0;
+	}
+	55%,
+	100% {
+		-webkit-mask-position: -80% 0;
+		mask-position: -80% 0;
+	}
+}
+
+/* 阶:一条向上走的线。金光沿阶而上,走完一遍,再从头来。 */
+.home__stair {
+	width: min(560px, 86%);
+	height: 34px;
+	margin: clamp(8px, 1.8vh, 20px) 0 0;
+	overflow: visible;
+}
+
+.home__stair-base {
+	fill: none;
+	stroke: color-mix(in srgb, var(--ink) 16%, transparent);
+	stroke-width: 1.5;
+	vector-effect: non-scaling-stroke;
+}
+
+.home__stair-run {
+	fill: none;
+	stroke: var(--gold);
+	stroke-width: 1.8;
+	stroke-linecap: square;
+	vector-effect: non-scaling-stroke;
+	stroke-dasharray: 44 462;
+	stroke-dashoffset: 0;
+	animation: home-stair 6.4s var(--ease) infinite;
+}
+
+@keyframes home-stair {
+	0% {
+		stroke-dashoffset: 6;
+		opacity: 0;
+	}
+	12% {
+		opacity: 1;
+	}
+	70% {
+		stroke-dashoffset: -460;
+		opacity: 1;
+	}
+	88% {
+		opacity: 0;
+	}
+	100% {
+		stroke-dashoffset: -466;
+		opacity: 0;
+	}
+}
+
+/* 英文句子:一句一句轮换,逐词浮起 */
+.home__sentence {
+	margin: 0;
+	min-height: 1.6em;
+	font-family: var(--font-serif);
+	font-size: clamp(19px, 2.5vw, 30px);
+	line-height: 1.5;
+	color: var(--ink-soft);
+	letter-spacing: 0.01em;
+}
+
+.home__sentence-inner {
+	display: inline-block;
+}
+
+.home__word {
+	display: inline-block;
+	opacity: 0;
+	transform: translateY(0.4em);
+	animation: home-word-rise 620ms var(--ease) forwards;
+	animation-delay: calc(var(--i) * 62ms);
+}
+
+.home__word--space {
+	width: 0.32em;
+}
+
+@keyframes home-word-rise {
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+.home__lede {
+	margin: 0;
+	max-width: 30em;
+	font-size: clamp(15px, 1.55vw, 18px);
+	line-height: 1.9;
+	color: var(--ink-soft);
+}
+
+/* 入口按钮:页面的正中央,唯一的主行动 */
+.home__actions {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+	margin-top: clamp(4px, 1.4vh, 14px);
+}
+
+.home__enter {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 14px;
+	padding: 16px 30px 17px;
+	border: 0;
+	border-radius: 3px;
+	background: var(--ink);
+	color: var(--paper);
+	font: inherit;
+	font-size: 17px;
+	letter-spacing: 0.14em;
+	cursor: pointer;
+	overflow: hidden;
+	transition: transform 260ms var(--ease), box-shadow 260ms var(--ease);
+	box-shadow: var(--shadow);
+}
+
+.home__enter::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 2px;
+	background: var(--gold);
+	transform: scaleX(0.28);
+	transform-origin: left center;
+	transition: transform 420ms var(--ease), background 260ms var(--ease);
+}
+
+.home__enter:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-lift);
+}
+
+.home__enter:hover::after,
+.home__enter:focus-visible::after {
+	transform: scaleX(1);
+}
+
+.home__enter-arrow {
+	display: inline-flex;
+}
+
+.home__enter-arrow svg {
+	width: 20px;
+	height: 12px;
+	transition: transform 320ms var(--ease);
+}
+
+.home__enter:hover .home__enter-arrow svg {
+	transform: translateX(4px);
+}
+
+.home__note {
+	margin: 0;
+	font-size: 13px;
+	letter-spacing: 0.06em;
+	color: var(--ink-faint);
+}
+
+/* 页脚标记:逐词 · 逐句 · 逐篇 */
+.home__foot {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 18px;
+	margin-top: clamp(30px, 6vh, 64px);
+	font-size: 12px;
+	letter-spacing: 0.3em;
+	color: var(--ink-faint);
+}
+
+.home__foot-line {
+	width: clamp(30px, 7vw, 90px);
+	height: 1px;
+	background: var(--hairline);
+}
+
+/* ============================================================================
+   活页演示:点词看释义、点句看批改
+
+   页面里有一个真正在动的东西:一句原文,词逐个点亮,词条卡跟着换;
+   走到句号时换成批改卡 —— 两个产品动作,一个位置。
+
+   词条卡和批改卡共用一个格子(grid-area 1/1),所以切换时不会推动版面。
+   ========================================================================== */
+
+.home__demo {
+	padding: clamp(72px, 11vh, 140px) var(--gutter);
+	border-top: 1px solid var(--hairline-soft);
+}
+
+.home__demo-intro {
+	max-width: var(--measure);
+	margin: 0 auto clamp(34px, 5vh, 56px);
+	text-align: center;
+}
+
+.home__demo-title,
+.rungs__title {
+	margin: 0;
+	font-family: var(--font-brush);
+	font-size: clamp(34px, 4.4vw, 56px);
+	font-weight: 400;
+	letter-spacing: 0.05em;
+	line-height: 1.2;
+}
+
+.home__demo-lede {
+	margin: 16px auto 0;
+	max-width: 30em;
+	color: var(--ink-soft);
+	font-size: clamp(15px, 1.4vw, 17px);
+}
+
+/* 稿纸:一张纸,不是卡片 —— 纸面无边框无投影,浮在上面的词条卡才有资格有阴影 */
+.home__sheet {
+	position: relative;
+	max-width: 820px;
+	margin: 0 auto;
+	background: var(--card);
+	border-top: 1px solid var(--hairline-soft);
+	border-bottom: 1px solid var(--hairline-soft);
+	overflow: hidden;
+}
+
+.home__sheet-page {
+	padding: clamp(30px, 4.4vw, 48px) clamp(24px, 4vw, 46px) 30px;
+	background: var(--card);
+}
+
+/* 稿纸:横线是纸的底子,节奏和行距严格一致(28px 一行,27px 一线)
+   线落在基线之下约 4px —— 真的稿纸就是这么画的:线在字的下面一点。 */
+.home__sheet-paper {
+	position: relative;
+	line-height: 28px;
+	padding-bottom: 8px;
+}
+
+.home__sheet-ruled {
+	position: absolute;
+	inset: 0 -16px;
+	z-index: 0;
+	pointer-events: none;
+	background-image: repeating-linear-gradient(
+		to bottom,
+		transparent 0,
+		transparent 23px,
+		color-mix(in srgb, var(--gold) 20%, transparent) 23px,
+		color-mix(in srgb, var(--gold) 20%, transparent) 24px
+	);
+}
+
+.home__sheet-sentence {
+	position: relative;
+	z-index: 1;
+	margin: 0;
+	font-family: var(--font-serif);
+	font-size: clamp(20px, 2.6vw, 30px);
+	line-height: 28px;
+	color: var(--ink);
+	letter-spacing: 0.005em;
+}
+
+.home__num {
+	position: relative;
+	display: inline-block;
+	margin-right: 0.42em;
+	padding: 0 0.28em;
+	border: 0;
+	border-radius: 3px;
+	background: none;
+	font-family: inherit;
+	font-size: 0.44em;
+	vertical-align: 0.62em;
+	color: var(--ink-faint);
+	cursor: pointer;
+	transition: color 320ms var(--ease), background 320ms var(--ease);
+}
+
+.home__num.is-lit {
+	color: var(--accent-contrast);
+	background: var(--gold);
+}
+
+/* 词与词之间的空格。两个按钮是 inline-block,源码里的换行不产生空格,
+   所以空格必须是一个自己的元素。 */
+.home__space {
+	display: inline-block;
+	width: 0.32em;
+}
+
+.home__tok {
+	position: relative;
+	display: inline-block;
+	padding: 0 0.02em;
+	border: 0;
+	background: none;
+	font: inherit;
+	color: inherit;
+	border-radius: 2px;
+	cursor: pointer;
+	transition: color 320ms var(--ease), background 320ms var(--ease);
+}
+
+.home__tok:hover {
+	background: color-mix(in srgb, var(--gold) 9%, transparent);
+}
+
+.home__tok.is-lit {
+	color: var(--gold);
+	background: color-mix(in srgb, var(--gold) 13%, transparent);
+}
+
+.home__tok.is-lit::after {
+	content: "";
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: -0.06em;
+	height: 2px;
+	background: var(--gold);
+	animation: home-tick 320ms var(--ease);
+}
+
+@keyframes home-tick {
+	from {
+		transform: scaleX(0);
+	}
+	to {
+		transform: scaleX(1);
+	}
+}
+
+/* 面板:词条卡和批改卡共用一个位置 */
+.home__demo-panel {
+	display: grid;
+	border-top: 1px solid var(--hairline-soft);
+	background: var(--paper-deep);
+}
+
+.home__card {
+	grid-area: 1 / 1;
+	margin: 0;
+	padding: 22px clamp(24px, 4vw, 46px) 24px;
+	background: var(--card);
+	border-top: 1px solid var(--hairline-soft);
+	border-left: 2px solid var(--gold);
+	opacity: 0;
+	transform: translateY(8px);
+	pointer-events: none;
+	transition: opacity 420ms var(--ease), transform 420ms var(--ease);
+}
+
+/* 词条卡是浮在纸上的一张卡,不是撑满面板的一条带 */
+.home__card--gloss {
+	max-width: 360px;
+	margin: 22px 0 22px clamp(24px, 4vw, 46px);
+	padding: 18px 22px 20px;
+	border: 1px solid var(--hairline);
+	border-left: 2px solid var(--gold);
+	border-radius: 3px;
+	box-shadow: var(--shadow);
+}
+
+/* 批改卡是整条:它有两行对照,挤在半宽的卡里读不动 */
+.home__card--mark {
+	padding: 22px clamp(24px, 4vw, 46px) 24px;
+}
+
+.home__card.is-on {
+	opacity: 1;
+	transform: none;
+}
+
+.home__card-head {
+	display: flex;
+	align-items: baseline;
+	gap: 12px;
+	margin: 0;
+}
+
+.home__card-word {
+	font-family: var(--font-serif);
+	font-size: 30px;
+	line-height: 1.1;
+}
+
+.home__card-word--sm {
+	font-family: inherit;
+	font-size: 17px;
+	letter-spacing: 0.04em;
+}
+
+.home__card-pos {
+	font-size: 12px;
+	letter-spacing: 0.16em;
+	color: var(--gold);
+}
+
+.home__card-ipa {
+	margin: 5px 0 10px;
+	font-family: var(--font-serif);
+	font-style: italic;
+	font-size: 15px;
+	color: var(--ink-faint);
+}
+
+.home__card-meaning {
+	margin: 0;
+	font-size: 16px;
+	color: var(--ink);
+}
+
+.home__card-note {
+	margin: 14px 0 0;
+	padding-top: 12px;
+	border-top: 1px solid var(--hairline-soft);
+	font-size: 12px;
+	letter-spacing: 0.06em;
+	color: var(--ink-faint);
+}
+
+/* 批改卡 */
+.home__card-mark {
+	display: grid;
+	grid-template-columns: 68px minmax(0, 1fr);
+	gap: 6px 16px;
+	margin: 12px 0 0;
+}
+
+.home__card-mark-label {
+	font-size: 12px;
+	letter-spacing: 0.1em;
+	color: var(--ink-faint);
+	padding-top: 0.3em;
+}
+
+.home__card-mark-text {
+	font-family: var(--font-serif);
+	font-size: 16px;
+	line-height: 1.6;
+	color: var(--ink-soft);
+}
+
+.home__card-mark-text--ref {
+	color: var(--ink);
+}
+
+.home__card-points {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 16px 0 0;
+	padding-top: 14px;
+	border-top: 1px solid var(--hairline-soft);
+}
+
+.home__card-point {
+	padding: 4px 11px 5px;
+	border-radius: 20px;
+	font-size: 12.5px;
+	letter-spacing: 0.04em;
+	border: 1px solid transparent;
+}
+
+.home__card-point--bad {
+	color: var(--danger);
+	background: color-mix(in srgb, var(--danger) 10%, transparent);
+	border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+}
+
+.home__card-point--good {
+	color: var(--ink-soft);
+	background: color-mix(in srgb, var(--gold) 10%, transparent);
+	border-color: color-mix(in srgb, var(--gold) 32%, transparent);
+}
+
+/* ============================================================================
+   三阶
+   ========================================================================== */
+
+.rungs {
+	padding: clamp(72px, 11vh, 140px) var(--gutter);
+	border-top: 1px solid var(--hairline-soft);
+}
+
+.rungs__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 24px;
+	max-width: 900px;
+	margin: 0 auto clamp(30px, 5vh, 52px);
+	flex-wrap: wrap;
+}
+
+.rungs__lede {
+	margin: 0;
+	color: var(--ink-soft);
+	font-size: clamp(15px, 1.4vw, 17px);
+}
+
+.rungs__list {
+	list-style: none;
+	margin: 0 auto;
+	padding: 0;
+	max-width: 900px;
+}
+
+.rung {
+	display: grid;
+	grid-template-columns: 96px minmax(0, 1fr);
+	grid-template-areas: "mark name" "mark text";
+	gap: 6px 32px;
+	padding: 32px 0;
+	border-top: 1px solid var(--hairline-soft);
+	transition:
+		opacity 0.7s var(--ease),
+		transform 0.7s var(--ease);
+	transition-delay: calc(var(--i) * 90ms);
+}
+
+/* Reveal is opt-in. Until the observer is running nothing here is hidden, and the class that
+   hides comes from home.ts only after it has something to observe. */
+.home[data-reveal="ready"] .rung:not([data-reveal="in"]) {
+	opacity: 0;
+	transform: translateY(18px);
+}
+
+.rung:last-child {
+	border-bottom: 1px solid var(--hairline-soft);
+}
+
+.rung__mark {
+	grid-area: mark;
+	margin: 0;
+	font-size: 13px;
+	letter-spacing: 0.2em;
+	color: var(--gold);
+	padding-top: 0.62em;
+}
+
+.rung__name {
+	grid-area: name;
+	margin: 0;
+	font-family: var(--font-brush);
+	font-size: clamp(24px, 2.6vw, 34px);
+	font-weight: 400;
+	letter-spacing: 0.04em;
+	line-height: 1.35;
+}
+
+.rung__text {
+	grid-area: text;
+	margin: 0;
+	max-width: 30em;
+	color: var(--ink-soft);
+	font-size: 16px;
+	line-height: 1.8;
+}
+
+/* ============================================================================
+   收尾
+   ========================================================================== */
+
+.home__close {
+	padding: clamp(80px, 13vh, 160px) var(--gutter);
+	background: var(--band);
+	color: var(--band-fg);
+	text-align: center;
+}
+
+.home__close-line {
+	margin: 0;
+	font-family: var(--font-brush);
+	font-size: clamp(38px, 5.6vw, 76px);
+	letter-spacing: 0.08em;
+	line-height: 1.15;
+}
+
+.home__close-sub {
+	margin: 18px 0 34px;
+	color: color-mix(in srgb, var(--band-fg) 66%, transparent);
+	font-size: 16px;
+}
+
+.home__close-enter {
+	display: inline-block;
+	padding: 13px 26px 14px;
+	border: 1px solid color-mix(in srgb, var(--band-fg) 32%, transparent);
+	border-radius: 3px;
+	background: none;
+	color: var(--band-fg);
+	font: inherit;
+	font-size: 15px;
+	letter-spacing: 0.12em;
+	cursor: pointer;
+	transition: border-color 260ms var(--ease), background 260ms var(--ease);
+}
+
+.home__close-enter:hover {
+	border-color: var(--gold);
+	background: color-mix(in srgb, var(--gold) 16%, transparent);
+}
+
+.home__footer {
+	padding: 26px var(--gutter);
+	background: var(--band);
+	border-top: 1px solid var(--band-line);
+}
+
+.home__footer-line {
+	margin: 0;
+	text-align: center;
+	font-size: 12.5px;
+	letter-spacing: 0.06em;
+	color: color-mix(in srgb, var(--band-fg) 62%, transparent);
+}
+
+.home__footer-mono {
+	font-family: var(--font-serif);
+	letter-spacing: 0.12em;
+	color: color-mix(in srgb, var(--band-fg) 78%, transparent);
+}
+
+/* ============================================================================
+   文章库
+   ========================================================================== */
+
+/* 文章库是一屏的工具页,不是封面页:页面本身锁在视口高度,滚动条在卡片网格上。
+   导航行因此一直可见,卡片再多也不会把顶栏顶走 —— 这条是修过的老问题。 */
+.library {
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr);
+	gap: 16px;
+	height: 100dvh;
+	padding: 0 var(--gutter) 24px;
+	background: var(--paper);
+}
+
+.library__nav {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	padding: 24px 0;
+	border-bottom: 1px solid var(--hairline-soft);
+}
+
+.library__home {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--ink-soft);
+	font: inherit;
+	font-size: 14px;
+	cursor: pointer;
+	transition: color 200ms var(--ease);
+}
+
+.library__home:hover {
+	color: var(--gold);
+}
+
+.library__home svg {
+	width: 18px;
+	height: 11px;
+}
+
+.library__brand {
+	margin: 0 auto 0 10px;
+	font-family: var(--font-brush);
+	font-size: 28px;
+	font-weight: 400;
+	letter-spacing: 0.08em;
+}
+
+.library__tools {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+/* 单词库是纸面上的第二个去处,描边按钮;新建文章仍是这块工具栏里唯一的主按钮。 */
+.library__words {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	height: 36px;
+	padding: 0 13px;
+	color: var(--ink-soft);
+	background: transparent;
+	border: 1px solid var(--hairline);
+	font-size: 13px;
+	white-space: nowrap;
+	transition: color 200ms var(--ease), border-color 200ms var(--ease);
+}
+
+.library__words:hover {
+	color: var(--gold);
+	border-color: var(--gold);
+	filter: none;
+}
+
+.library__words-icon {
+	width: 16px;
+	height: 16px;
+}
+
+.library__new {
+	height: 36px;
+	padding: 0 16px;
+	font-size: 13px;
+	white-space: nowrap;
+}
+
+.library__new:disabled {
+	opacity: 0.45;
+	cursor: default;
+	filter: none;
+}
+
+/* 删除模式:提示写在工具栏里,不另开一行 */
+.library__hint {
+	margin: 0;
+	font-size: 13px;
+	letter-spacing: 0.04em;
+	color: var(--danger);
+}
+
+.library__grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(268px, 1fr));
+	gap: 20px;
+	align-content: start;
+	min-height: 0; /* lets the grid child actually scroll inside the row */
+	overflow-y: auto;
+	/* 4px = the 2px hover lift + the 1px top border + 1px slack. margin-top drops from 36
+	   to 32 so the first card's resting position is unchanged. */
+	margin-top: 32px;
+	padding-top: 4px;
+	padding-bottom: 24px;
+}
+
+.article-card {
+	min-width: 0; /* a long English word must not widen the grid */
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 24px 24px 20px;
+	text-align: left;
+	background: var(--card);
+	border: 1px solid var(--hairline);
+	border-radius: 4px;
+	box-shadow: none;
+	cursor: pointer;
+	color: var(--ink);
+	transition: border-color 240ms var(--ease), transform 240ms var(--ease), box-shadow 240ms var(--ease);
+}
+
+.article-card:hover {
+	border-color: color-mix(in srgb, var(--gold) 60%, transparent);
+	transform: translateY(-2px);
+	box-shadow: var(--shadow);
+}
+
+.article-card__title {
+	margin: 0;
+	font-family: var(--font-serif);
+	font-size: 20px;
+	line-height: 1.45;
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+.article-card__preview {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.7;
+	color: var(--ink-soft);
+	overflow: hidden;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	line-clamp: 3;
+	-webkit-box-orient: vertical;
+}
+
+.article-card__meta {
+	margin: auto 0 0;
+	padding-top: 14px;
+	border-top: 1px solid var(--hairline-soft);
+	font-size: 12px;
+	letter-spacing: 0.1em;
+	color: var(--ink-faint);
+}
+
+.article-card--new {
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	min-height: 168px;
+	font: inherit;
+	color: var(--ink-soft);
+	background: transparent;
+	border-style: dashed;
+}
+
+.article-card--new:hover {
+	color: var(--ink);
+	background: color-mix(in srgb, var(--gold) 6%, transparent);
+	border-color: var(--gold);
+}
+
+.article-card__plus {
+	font-size: 30px;
+	line-height: 1;
+	color: var(--gold);
+}
+
+.article-card__new-label {
+	font-size: 15px;
+	letter-spacing: 0.06em;
+}
+
+/* Delete mode: cards become selectable and the selected ones get a solid red frame. */
+.library[data-mode="delete"] .article-card {
+	cursor: pointer;
+}
+
+.library[data-mode="delete"] .article-card[data-selected="true"] {
+	border: 2px solid var(--danger);
+	background: var(--card);
+}
+
+.library[data-mode="delete"] .article-card--new {
+	opacity: 0.35;
+	pointer-events: none;
+}
+
+/* 垃圾桶在待删除的状态里自己变红,不需要另配文案 */
+.library[data-mode="delete"] .icon-button--trash {
+	color: var(--danger);
+	border-color: color-mix(in srgb, var(--danger) 50%, transparent);
+}
+
+/* ============================================================================
+   窄屏
+   ========================================================================== */
+
+@media (max-width: 720px) {
+	.home__hero {
+		min-height: calc(100dvh - 70px);
+		padding-top: clamp(36px, 7vh, 64px);
+	}
+
+	.home__glyphs {
+		font-size: clamp(88px, 26vw, 150px);
+	}
+
+	.home__foot {
+		letter-spacing: 0.2em;
+	}
+
+	.rung {
+		grid-template-columns: 1fr;
+		grid-template-areas: "mark" "name" "text";
+		gap: 8px;
+	}
+
+	.rung__mark {
+		padding-top: 0;
+	}
+
+	.library__brand {
+		margin-right: auto;
+	}
+
+	/* The label would crowd 新建文章 and three icon buttons on a phone. */
+	.library__words {
+		justify-content: center;
+		width: 36px;
+		padding: 0;
+	}
+
+	.library__words-label {
+		display: none;
+	}
+}
+
+/* ============================================================================
+   关闭动效
+
+   平台说不要动效时,所有循环停在完成态,而不是留白:
+   金箔停在字面中间,句子显示完整,演示区停在第一个词上。
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+	.home__hero,
+	.home__demo,
+	.rungs,
+	.home__close {
+		scroll-behavior: auto;
+	}
+
+	.home__foil {
+		-webkit-mask-position: 50% 0;
+		mask-position: 50% 0;
+		animation: none;
+	}
+
+	.home__stair-run {
+		animation: none;
+		stroke-dashoffset: -230;
+		opacity: 1;
+	}
+
+	.home__word {
+		opacity: 1;
+		transform: none;
+		animation: none;
+	}
+
+	.home__tok.is-lit::after {
+		animation: none;
+	}
+}
