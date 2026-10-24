@@ -1,4 +1,3 @@
-<img style="display: block; margin: 0 auto;" width="256" height="256" alt="拾级-256" src="https://github.com/user-attachments/assets/57590951-10be-4e02-a61c-23b8e63aec64" />
 # 拾级(Shiji)
 
 
