@@ -1,4 +1,5 @@
-# 拾级(Shiji)
+# 拾级(Shiji)<img width="256" height="256" alt="拾级-256" src="https://github.com/user-attachments/assets/57590951-10be-4e02-a61c-23b8e63aec64" />
+
 
 读英文原文时点单词看词性和中文释义,点句子练翻译;读过的词会攒成"卡住的词",可以一键导出成 A4 单词表去打印。浏览器 + 一个只监听本机的 Node 服务,没有框架,没有数据库服务。
 
