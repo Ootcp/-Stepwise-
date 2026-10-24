@@ -1,0 +1,19 @@
+# 第三方与致谢
+
+拾级本身是 MIT 授权的(见 `LICENSE`)。它运行时或打包时会用到下面这些第三方东西,授权各自如下——这里只是把来源说清楚,不构成对它们授权范围的修改。
+
+## 模型能力:`@earendil-works/pi-ai`
+
+翻译、批改、句子成分分析和问书都通过 [`@earendil-works/pi-ai`](https://github.com/earendil-works/pi)(MIT)调用模型,它是上游 pi 项目的一部分。拾级不内置任何模型密钥:密钥来自环境变量 `SENSENOVA_API_KEY`、上游的 `~/.pi/agent/models.json`,或应用内"设置"页填写的服务。
+
+## 离线词典:ECDICT
+
+可选的离线词典来自 [skywind3000/ECDICT](https://github.com/skywind3000/ECDICT)。安装包**不**包含词典;勾选后由 `scripts/win/fetch-ecdict.ps1` 从官方 release 下载 `ecdict-sqlite-28.zip`(1.0.28,SHA-256 固定校验),再用 `scripts/win/build-dictionary.mjs` 投影成拾级读取的 `words` 表。词典数据不受本仓库 MIT 授权覆盖,请遵循 ECDICT 自身的授权。
+
+## 安装程序:Inno Setup 与中文语言文件
+
+Windows 安装包用 [Inno Setup](https://jrsoftware.org/) 编译(通过 npm 包 `innosetup` 自带的 ISCC,无需在构建机上安装任何东西)。`installer/languages/ChineseSimplified.isl` 是 Inno Setup 社区维护的简体中文消息文件,文件头保留了原作者与出处信息,授权以该文件头部说明为准。
+
+## 便携 Node.js
+
+打包时按 `scripts/win/node-runtime.json` 里固定的版本与 SHA-256 下载官方 Node 发行包,只取其中的 `node.exe` 随安装包分发。Node.js 遵循它自己的许可证。

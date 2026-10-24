@@ -1,0 +1,32 @@
+{
+	"name": "shiji",
+	"version": "0.2.0",
+	"description": "拾级: a browser-based English reading companion. Click a word for its part of speech and meaning, click a sentence to practise translating it",
+	"license": "MIT",
+	"author": "Ootcp",
+	"type": "module",
+	"engines": {
+		"node": ">=22.19"
+	},
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"serve": "node server/main.ts --serve",
+		"typecheck": "tsc -p tsconfig.json --noEmit",
+		"test": "vitest --run --config vitest.config.ts",
+		"package:win": "node scripts/win/build.mjs",
+		"package:win:smoke": "node scripts/win/smoke.mjs"
+	},
+	"dependencies": {
+		"@earendil-works/pi-ai": "1.3.0"
+	},
+	"devDependencies": {
+		"@types/node": "22.19.19",
+		"esbuild": "0.28.2",
+		"innosetup": "6.4.1",
+		"typescript": "7.0.2",
+		"vite": "8.0.16",
+		"vitest": "4.1.11"
+	}
+}
